@@ -22,87 +22,164 @@
 
 ## Встановлення
 
-### З джерельного коду (розробник)
+### Opera (v95+) — покроково
+
+Opera базується на Chromium і підтримує розширення Chrome у режимі розробника.
+
+**Крок 1 — Завантаж репо**
 
 ```bash
 git clone https://github.com/Architekt-future/veritas-witness-extension.git
 ```
 
-1. Chrome → `chrome://extensions/`
-2. Увімкни **"Режим розробника"** (правий верхній кут)
-3. **"Завантажити нерозпаковане"** → вибери папку `veritas-witness-extension`
-4. Іконка 👁 з'явиться в панелі браузера
+Або завантаж ZIP з GitHub → розпакуй в будь-яку папку.
 
-### Налаштування
+**Крок 2 — Відкрий менеджер розширень**
 
-Клік на іконку → ⚙ Налаштування → вкажи свій Veritas API endpoint.
+Є два способи:
+- Адресний рядок → введи: `opera://extensions`
+- Або: меню Opera (червона кнопка O зліва вгорі) → **Розширення** → **Розширення**
 
-За замовчуванням використовується публічний сервер `https://veritas-protocol.onrender.com`. Якщо маєш власний деплой — вкажи його URL.
+**Крок 3 — Увімкни режим розробника**
+
+В правому верхньому куті сторінки розширень — перемикач **"Режим разработчика"** (або Developer mode). Увімкни його.
+
+> ⚠️ Без цього кнопка завантаження не з'явиться
+
+**Крок 4 — Завантаж розширення**
+
+Натисни кнопку **"Загрузить распакованное расширение"** (Load unpacked).
+
+У вікні вибору файлів — вибери папку `veritas-witness-extension` (ту де лежить `manifest.json`). Не вибирай окремий файл — саме **папку**.
+
+**Крок 5 — Готово**
+
+Іконка 👁 з'явиться в панелі браузера праворуч від адресного рядка. Якщо не видно — натисни іконку пазла (розширення) і закріпи Veritas Witness.
 
 ---
 
-## Архітектура
+### Chrome / Chromium
+
+1. Адресний рядок → `chrome://extensions/`
+2. Увімкни **Developer mode** (правий верхній кут)
+3. **Load unpacked** → вибери папку з розширенням
+4. Іконка 👁 з'явиться в панелі
+
+---
+
+### Brave / Edge / Vivaldi
+
+Той самий процес що і для Chrome. Всі ці браузери базуються на Chromium і підтримують Manifest V3.
+
+---
+
+## Перше використання
+
+**1. Перевір з'єднання**
+
+Клікни на іконку 👁 — в попапі має з'явитись зелена крапка "API онлайн". Якщо червона — сервер на Render сплять (безкоштовний план). Зачекай 30-60 секунд і спробуй знову.
+
+**2. Проаналізуй сторінку**
+
+- Клік на іконку → **"⟳ АНАЛІЗУВАТИ СТОРІНКУ"**
+- Або: виділи текст на будь-якому сайті → правий клік → **"👁 Свідок — аналізувати виділене"**
+
+**3. Читай результат**
+
+Бічна панель виїде справа з результатами:
+- **ЕНТРОПІЯ** — основна метрика (зелений = чисто, червоний = підозріло)
+- **СИГНАЛИ** — конкретні патерни маніпуляції якщо знайдені
+- **🌐 ПОЛЕ** — контекст поточних новин (якщо є displacement)
+- **🐊 PERFORMATIVE** — детектор крокодилячих сліз
+- Кнопка **"👁 СЛОВО СВІДКА"** — другий рівень аналізу через Claude
+
+**4. Налаштуй під себе**
+
+Іконка → **НАЛАШТУВАННЯ** або `opera://extensions` → Veritas Witness → Details → Extension options:
+- Вкажи власний API endpoint якщо є свій деплой
+- Вмикай/вимикай окремі модулі
+
+---
+
+## Структура файлів
 
 ```
-manifest.json      — Manifest V3, permissions
-background.js      — Service worker: API calls, context menu, badge
-content.js         — Injected script: sidebar DOM, аналіз сторінки
-popup.html         — Клік на іконку: швидкі дії + статус API
-options.html       — Налаштування модулів і endpoint
-styles/sidebar.css — Стилі бічної панелі
-icons/             — 16/32/48/128px
+veritas-witness-extension/
+├── manifest.json          — Manifest V3, дозволи, реєстрація файлів
+├── background.js          — Service worker: API запити, контекстне меню, badge
+├── sidebar.js             — Content script: бічна панель, аналіз, рендер результатів
+├── sidebar.html           — HTML-шаблон панелі (довідка; інжектується через sidebar.js)
+├── popup.html             — Popup при кліку на іконку
+├── popup.js               — Логіка попапу
+├── options.html           — Сторінка налаштувань
+├── options.js             — Логіка налаштувань
+├── styles/
+│   ├── sidebar.css        — Стилі бічної панелі (підключаються через manifest)
+│   ├── popup.css          — Стилі попапу
+│   └── options.css        — Стилі налаштувань
+└── icons/
+    ├── icon16.png
+    ├── icon32.png
+    ├── icon48.png
+    └── icon128.png
 ```
 
 **Потік даних:**
 ```
-Користувач → content.js → background.js → Veritas API → response → sidebar render
+Дія користувача
+    ↓
+sidebar.js (content script)
+    ↓ chrome.runtime.sendMessage
+background.js (service worker)
+    ↓ fetch
+Veritas API (Render)
+    ↓
+background.js → sidebar.js → рендер в панелі
 ```
 
-Background worker ізолює всі мережеві запити — content script не має прямого доступу до API.
+Background worker ізолює всі мережеві запити — content script не має прямого доступу до мережі.
 
 ---
 
 ## Veritas API
 
-Розширення використовує два endpoints:
-
 ```
-POST /api/analyze   — основний аналіз (ентропія, LAC, контекст, performative)
-POST /api/oracle    — Слово Свідка (аналіз патерну через Claude)
+POST /api/analyze   — аналіз тексту (ентропія, LAC, контекст, performative)
+POST /api/oracle    — Слово Свідка (аналіз патерну через Claude Haiku)
+GET  /api/health    — статус сервера
 ```
 
-Документація: [veritas-protocol.onrender.com](https://veritas-protocol.onrender.com)  
-Основний репо: [veritas-protocol](https://github.com/Architekt-future/veritas-protocol)
+Документація: [veritas-protocol.onrender.com](https://veritas-protocol.onrender.com)
 
 ---
 
 ## Власний сервер
 
-Якщо не хочеш використовувати публічний endpoint:
-
-1. Задеплой [veritas-protocol](https://github.com/Architekt-future/veritas-protocol) на Render або будь-де
-2. Додай `ANTHROPIC_API_KEY` в environment variables
-3. В налаштуваннях розширення вкажи свій URL
+```bash
+git clone https://github.com/Architekt-future/veritas-protocol.git
+# деплой на Render, додай ANTHROPIC_API_KEY
+# в налаштуваннях розширення вкажи свій URL
+```
 
 ---
 
-## Статус
+## Відомі обмеження
 
-🚧 **Pre-release** — працюючий прототип, не опублікований в Chrome Web Store.  
-Тестувалось на Chrome 121+, Chromium-based браузерах.
+- Перший запит після сну Render сервера — 30-60 сек затримка
+- Авто-аналіз вимкнено за замовчуванням (збирає запити до API)
+- `chrome://` і `opera://` сторінки не аналізуються (обмеження браузера)
 
 ---
 
 ## Ліцензія
 
-MIT з етичними вимогами — як і основний Veritas Protocol.  
-Детально: [LICENSE](LICENSE)
+MIT з етичними вимогами. Детально: [LICENSE](LICENSE)
 
 ---
 
 ## Частина екосистеми
 
-- **[veritas-protocol](https://github.com/Architekt-future/veritas-protocol)** — основний сервер і веб-інтерфейс
+- **[veritas-protocol](https://github.com/Architekt-future/veritas-protocol)** — сервер і веб-інтерфейс
 - **veritas-witness-extension** — браузерне доповнення ← ти тут
 
 *Живий прототип. Свідок дивиться.*
