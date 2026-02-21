@@ -68,7 +68,13 @@ async function handleAnalyze({ text, url }, sendResponse) {
     const { apiEndpoint } = await chrome.storage.sync.get('apiEndpoint');
     const endpoint = (apiEndpoint || DEFAULT_SETTINGS.apiEndpoint).replace(/\/$/, '');
 
-    const body = url && !text ? { url } : { text };
+    // Розширення ЗАВЖДИ відправляє витягнутий текст — ніколи URL.
+    // Більшість сайтів блокує серверний скрапінг.
+    if (!text || text.trim().length < 30) {
+      sendResponse({ ok: false, error: 'Недостатньо тексту для аналізу. Спробуй виділити текст вручну.' });
+      return;
+    }
+    const body = { text };
 
     const res = await fetch(`${endpoint}/api/analyze`, {
       method:  'POST',
@@ -85,7 +91,7 @@ async function handleAnalyze({ text, url }, sendResponse) {
 }
 
 // ── API: WITNESS WORD ─────────────────────────────────────────────────────────
-async function handleWitnessWord({ diagnostics, textPreview }, sendResponse) {
+async function handleWitnessWord({ diagnostics, textPreview, textTopic }, sendResponse) {
   try {
     const { apiEndpoint } = await chrome.storage.sync.get('apiEndpoint');
     const endpoint = (apiEndpoint || DEFAULT_SETTINGS.apiEndpoint).replace(/\/$/, '');
@@ -93,7 +99,7 @@ async function handleWitnessWord({ diagnostics, textPreview }, sendResponse) {
     const res = await fetch(`${endpoint}/api/oracle`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ diagnostics, text_preview: textPreview }),
+      body:    JSON.stringify({ diagnostics, text_preview: textPreview, text_topic: textTopic }),
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
