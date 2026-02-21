@@ -332,10 +332,14 @@
     show('vt-witness-block');
     setText('vt-witness-text', '...');
 
+    // Передаємо text_topic щоб Oracle не накладав геополітику на спорт/культуру
+    const textTopic = currentResult.context?.text_topic || null;
+
     chrome.runtime.sendMessage({
       type:        'WITNESS_WORD',
       diagnostics: currentResult,
       textPreview: currentText.slice(0, 300),
+      textTopic,
     }, (resp) => {
       btn.disabled = false;
       btn.textContent = '↺ СЛОВО СВІДКА ЗНОВУ';
