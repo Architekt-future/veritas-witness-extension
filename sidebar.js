@@ -190,18 +190,21 @@
     const NOISE_SELECTORS = [
       'nav', 'header', 'footer', 'aside',
       'script', 'style', 'noscript',
-      '[class*="sidebar"]', '[class*="related"]',
-      '[class*="recommend"]', '[class*="also-read"]',
-      '[class*="also_read"]', '[class*="read-also"]',
-      '[class*="more-news"]', '[class*="widget"]',
-      '[class*="social"]', '[class*="share"]',
-      '[class*="comment"]', '[class*="advert"]',
-      '[class*="banner"]', '[class*="promo"]',
-      '[class*="tags"]', '[class*="tag-list"]',
-      '[class*="author"]', '[class*="byline"]',
-      '[class*="breadcrumb"]', '[class*="pagination"]',
-      '[class*="newsletter"]', '[class*="subscribe"]',
-      'figure > figcaption',  // підписи до фото
+      // Точні селектори — без wildcard щоб не вбити контент статті
+      '[class="sidebar"]', '[id="sidebar"]',
+      '[class="related"]', '[id="related"]',
+      '[class="related-articles"]', '[id="related-articles"]',
+      '[class="also-read"]', '[class="read-also"]',
+      '[class="more-news"]', '[id="more-news"]',
+      '[class="social"]', '[class="social-share"]',
+      '[class="share"]', '[class="sharing"]',
+      '[class="comments"]', '[id="comments"]',
+      '[class="advertisement"]', '[class="advert"]',
+      '[class="banner"]', '[id="banner"]',
+      '[class="newsletter"]', '[class="subscribe"]',
+      '[class="breadcrumb"]', '[class="breadcrumbs"]',
+      '[class="pagination"]',
+      'figure > figcaption',
     ];
 
     NOISE_SELECTORS.forEach(sel => {
