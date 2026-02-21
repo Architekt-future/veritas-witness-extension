@@ -1,0 +1,100 @@
+<!--
+  Veritas Witness — Sidebar HTML Template
+  
+  Цей файл НЕ відкривається напряму браузером.
+  Його вміст інжектується в сторінку через content.js (sidebar.js).
+  Стилі підключаються через manifest.json → content_scripts → css.
+-->
+
+<div id="vt-header">
+  <div id="vt-logo">
+    <span id="vt-eye">👁</span>
+    <span id="vt-title">VERITAS WITNESS</span>
+  </div>
+  <div id="vt-controls">
+    <button id="vt-analyze-page" title="Аналізувати сторінку">⟳</button>
+    <button id="vt-close" title="Закрити">✕</button>
+  </div>
+</div>
+
+<div id="vt-body">
+
+  <!-- IDLE STATE -->
+  <div id="vt-idle">
+    <div id="vt-idle-text">
+      Виділіть текст і натисніть праву кнопку<br>
+      або натисніть ⟳ для аналізу сторінки
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="vt-loading" style="display:none">
+    <div id="vt-spinner">⟳</div>
+    <div id="vt-loading-text">Свідок аналізує...</div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="vt-result" style="display:none">
+
+    <!-- ENTROPY GAUGE -->
+    <div id="vt-entropy-block">
+      <div id="vt-entropy-label">ЕНТРОПІЯ</div>
+      <div id="vt-entropy-value">—</div>
+      <div id="vt-entropy-bar-wrap">
+        <div id="vt-entropy-bar"></div>
+      </div>
+      <div id="vt-verdict">—</div>
+    </div>
+
+    <!-- SIGNALS -->
+    <div id="vt-signals-block" style="display:none">
+      <div class="vt-section-label">СИГНАЛИ</div>
+      <div id="vt-signals-list"></div>
+    </div>
+
+    <!-- CONTEXT FIELD -->
+    <div id="vt-context-block" style="display:none">
+      <div class="vt-section-label">🌐 ПОЛЕ</div>
+      <div id="vt-context-verdict"></div>
+      <div id="vt-context-topics"></div>
+    </div>
+
+    <!-- PERFORMATIVE -->
+    <div id="vt-perf-block" style="display:none">
+      <div class="vt-section-label">🐊 PERFORMATIVE</div>
+      <div id="vt-perf-verdict"></div>
+    </div>
+
+    <!-- WITNESS WORD OUTPUT -->
+    <div id="vt-witness-block" style="display:none">
+      <div class="vt-section-label">СЛОВО СВІДКА</div>
+      <div id="vt-witness-text"></div>
+    </div>
+
+    <!-- WITNESS WORD BUTTON -->
+    <button id="vt-witness-btn" style="display:none">
+      👁 СЛОВО СВІДКА
+    </button>
+
+  </div>
+
+  <!-- ERROR STATE -->
+  <div id="vt-error" style="display:none">
+    <div id="vt-error-text"></div>
+    <button id="vt-retry">↺ Повторити</button>
+  </div>
+
+</div>
+
+<!-- FOOTER TOGGLES -->
+<div id="vt-footer">
+  <label class="vt-toggle" title="Пасивний індикатор">
+    <input type="checkbox" id="vt-tog-passive">
+    <span>Індикатор</span>
+  </label>
+  <label class="vt-toggle" title="Слово Свідка">
+    <input type="checkbox" id="vt-tog-witness">
+    <span>Свідок</span>
+  </label>
+  <a id="vt-options-link" title="Налаштування">⚙</a>
+</div>
