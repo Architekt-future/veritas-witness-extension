@@ -137,18 +137,95 @@
   function showSidebar() { sidebarEl.classList.add('vt-open'); }
   function hideSidebar()  { sidebarEl.classList.remove('vt-open'); }
 
+  // ── TEXT EXTRACTION ────────────────────────────────────────────────────────
+
+  /**
+   * Клонує корінь і видаляє з нього все що не є основним текстом:
+   * навігацію, хедер, футер, сайдбари, рекламу, "читайте також", теги, скрипти.
+   * Залишає тільки тіло статті.
+   */
+  function extractArticleText() {
+    // 1. Знаходимо найкращий корінь статті
+    const ARTICLE_SELECTORS = [
+      'article',
+      '[itemprop="articleBody"]',
+      '.article-body',
+      '.article__body',
+      '.article-content',
+      '.post-content',
+      '.entry-content',
+      '.story-body',
+      '.news-text',
+      '.article-text',
+      '[role="main"] p',  // fallback — абзаци в main
+    ];
+
+    // Шукаємо перший селектор який дає достатньо тексту
+    let articleEl = null;
+    for (const sel of ARTICLE_SELECTORS) {
+      const el = document.querySelector(sel);
+      if (el && el.innerText.trim().length > 200) {
+        articleEl = el;
+        break;
+      }
+    }
+
+    // 2. Якщо нічого не знайшли — fallback: збираємо всі <p> з body
+    if (!articleEl) {
+      const paragraphs = Array.from(document.querySelectorAll('p'))
+        .filter(p => {
+          // Виключаємо абзаци в навігації, футері, сайдбарі
+          const parent = p.closest('nav, header, footer, aside, [class*="sidebar"], [class*="related"], [class*="recommend"], [class*="also"], [class*="widget"], [id*="sidebar"], [id*="footer"], [id*="header"]');
+          return !parent && p.innerText.trim().length > 40;
+        })
+        .map(p => p.innerText.trim());
+
+      return paragraphs.slice(0, 50).join('\n');
+    }
+
+    // 3. Клонуємо щоб не псувати DOM
+    const clone = articleEl.cloneNode(true);
+
+    // 4. Видаляємо шум з клону
+    const NOISE_SELECTORS = [
+      'nav', 'header', 'footer', 'aside',
+      'script', 'style', 'noscript',
+      '[class*="sidebar"]', '[class*="related"]',
+      '[class*="recommend"]', '[class*="also-read"]',
+      '[class*="also_read"]', '[class*="read-also"]',
+      '[class*="more-news"]', '[class*="widget"]',
+      '[class*="social"]', '[class*="share"]',
+      '[class*="comment"]', '[class*="advert"]',
+      '[class*="banner"]', '[class*="promo"]',
+      '[class*="tags"]', '[class*="tag-list"]',
+      '[class*="author"]', '[class*="byline"]',
+      '[class*="breadcrumb"]', '[class*="pagination"]',
+      '[class*="newsletter"]', '[class*="subscribe"]',
+      'figure > figcaption',  // підписи до фото
+    ];
+
+    NOISE_SELECTORS.forEach(sel => {
+      clone.querySelectorAll(sel).forEach(el => el.remove());
+    });
+
+    return clone.innerText.trim();
+  }
+
   // ── ANALYSIS ───────────────────────────────────────────────────────────────
   function analyzeCurrentPage() {
     showSidebar();
     setLoading(true);
-    const root = document.querySelector(
-      'article, main, [role="main"], .article-body, .story-body'
-    ) || document.body;
-    const words = root.innerText
+
+    const raw = extractArticleText();
+
+    // Беремо перші 1500 слів довжиною > 2 символи (не фільтруємо короткі —
+    // у спортивних текстах багато значущих коротких слів: гол, м'яч, ліга)
+    const words = raw
       .split(/\s+/)
-      .filter(w => w.length > 3)
-      .slice(0, 1000)
+      .filter(w => w.length > 2)
+      .slice(0, 1500)
       .join(' ');
+
     analyzeText(words);
   }
 
