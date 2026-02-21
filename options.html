@@ -3,209 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Veritas Witness — Налаштування</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      min-height: 100vh;
-      background: #080810;
-      color: #c0c0e0;
-      font-family: 'Courier New', monospace;
-      padding: 40px 24px;
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
-      );
-      pointer-events: none;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 36px;
-    }
-
-    .eye { font-size: 24px; filter: drop-shadow(0 0 8px rgba(120,120,255,0.6)); }
-
-    h1 {
-      font-size: 14px;
-      letter-spacing: 4px;
-      color: #7777cc;
-    }
-
-    .version { font-size: 10px; color: #222244; letter-spacing: 2px; margin-left: auto; }
-
-    .section {
-      margin-bottom: 28px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .section-title {
-      font-size: 9px;
-      letter-spacing: 4px;
-      color: #444466;
-      padding: 10px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      background: rgba(255,255,255,0.01);
-    }
-
-    .option-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      gap: 16px;
-    }
-
-    .option-row:last-child { border-bottom: none; }
-
-    .option-info { flex: 1; }
-
-    .option-label {
-      font-size: 11px;
-      color: #9090cc;
-      letter-spacing: 1px;
-      margin-bottom: 3px;
-    }
-
-    .option-desc {
-      font-size: 10px;
-      color: #333355;
-      line-height: 1.5;
-    }
-
-    /* Toggle switch */
-    .toggle {
-      position: relative;
-      width: 36px;
-      height: 20px;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .toggle input { display: none; }
-
-    .toggle-slider {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(100,100,255,0.2);
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .toggle-slider::after {
-      content: '';
-      position: absolute;
-      left: 2px;
-      top: 2px;
-      width: 14px;
-      height: 14px;
-      background: #444466;
-      border-radius: 50%;
-      transition: all 0.2s;
-    }
-
-    .toggle input:checked + .toggle-slider {
-      background: rgba(80, 80, 200, 0.25);
-      border-color: rgba(100, 100, 255, 0.5);
-    }
-
-    .toggle input:checked + .toggle-slider::after {
-      left: 18px;
-      background: #8888dd;
-    }
-
-    /* Text input */
-    .text-input {
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(100,100,255,0.2);
-      color: #a0a0cc;
-      padding: 8px 12px;
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      border-radius: 3px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .text-input:focus { border-color: rgba(100,100,255,0.5); }
-
-    .input-row {
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-    }
-
-    .input-label {
-      font-size: 9px;
-      letter-spacing: 2px;
-      color: #444466;
-      margin-bottom: 6px;
-    }
-
-    /* Save button */
-    #save-btn {
-      width: 100%;
-      padding: 12px;
-      background: rgba(80,80,200,0.15);
-      border: 1px solid rgba(100,100,255,0.3);
-      color: #7777bb;
-      font-family: 'Courier New', monospace;
-      font-size: 10px;
-      letter-spacing: 3px;
-      cursor: pointer;
-      border-radius: 3px;
-      transition: all 0.2s;
-      margin-bottom: 12px;
-    }
-
-    #save-btn:hover {
-      border-color: rgba(100,100,255,0.6);
-      color: #aaaade;
-    }
-
-    #save-status {
-      text-align: center;
-      font-size: 10px;
-      color: #4ade80;
-      letter-spacing: 2px;
-      height: 18px;
-    }
-
-    .footer {
-      margin-top: 32px;
-      font-size: 9px;
-      color: #222244;
-      letter-spacing: 2px;
-      text-align: center;
-      line-height: 1.8;
-    }
-
-    .footer a { color: #333366; text-decoration: none; }
-    .footer a:hover { color: #6666aa; }
-  </style>
+  <link rel="stylesheet" href="styles/options.css">
 </head>
 <body>
 
   <div class="header">
     <span class="eye">👁</span>
     <h1>VERITAS WITNESS</h1>
-    <span class="version">v1.0</span>
+    <span class="version">v1.0 · НАЛАШТУВАННЯ</span>
   </div>
 
   <!-- API ENDPOINT -->
@@ -215,7 +20,7 @@
       <div class="input-label">URL ВАШОГО VERITAS СЕРВЕРА</div>
       <input type="text" id="apiEndpoint" class="text-input"
         placeholder="https://veritas-protocol.onrender.com">
-      <div style="font-size:9px; color:#333355; margin-top:6px; letter-spacing:1px;">
+      <div class="input-hint">
         Вкажіть власний сервер або використовуйте публічний за замовчуванням
       </div>
     </div>
@@ -261,7 +66,7 @@
     <div class="option-row">
       <div class="option-info">
         <div class="option-label">⚡ АВТО-АНАЛІЗ</div>
-        <div class="option-desc">Автоматично аналізувати кожну сторінку при завантаженні (більше запитів)</div>
+        <div class="option-desc">Автоматично аналізувати кожну сторінку при завантаженні (більше запитів до API)</div>
       </div>
       <label class="toggle">
         <input type="checkbox" id="autoAnalyze">
@@ -272,22 +77,12 @@
 
   <!-- LANGUAGE -->
   <div class="section">
-    <div class="section-title">МОВА ІНТЕРФЕЙСУ</div>
+    <div class="section-title">МОВА</div>
     <div class="option-row">
       <div class="option-info">
-        <div class="option-label">МОВА</div>
+        <div class="option-label">МОВА ІНТЕРФЕЙСУ</div>
       </div>
-      <select id="language" style="
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(100,100,255,0.2);
-        color: #a0a0cc;
-        padding: 5px 10px;
-        font-family: 'Courier New', monospace;
-        font-size: 11px;
-        border-radius: 3px;
-        outline: none;
-        cursor: pointer;
-      ">
+      <select id="language" class="select-input">
         <option value="uk">Українська</option>
         <option value="en">English</option>
       </select>
@@ -298,43 +93,14 @@
   <div id="save-status"></div>
 
   <div class="footer">
-    <div>VERITAS WITNESS v1.0 · Part of Veritas Protocol ecosystem</div>
-    <div style="margin-top:4px;">
+    <div>VERITAS WITNESS v1.0 · Veritas Protocol ecosystem</div>
+    <div>
       <a href="https://github.com/Architekt-future/veritas-witness-extension" target="_blank">GitHub</a>
       &nbsp;·&nbsp;
       <a href="https://veritas-protocol.onrender.com" target="_blank">Live Demo</a>
     </div>
   </div>
 
-  <script>
-    const KEYS = ['apiEndpoint', 'passiveIndicator', 'contextMenu', 'witnessWord', 'autoAnalyze', 'language'];
-
-    // Load settings
-    chrome.storage.sync.get(KEYS, (s) => {
-      document.getElementById('apiEndpoint').value      = s.apiEndpoint      || 'https://veritas-protocol.onrender.com';
-      document.getElementById('passiveIndicator').checked = s.passiveIndicator !== false;
-      document.getElementById('contextMenu').checked      = s.contextMenu      !== false;
-      document.getElementById('witnessWord').checked      = s.witnessWord      !== false;
-      document.getElementById('autoAnalyze').checked      = !!s.autoAnalyze;
-      document.getElementById('language').value           = s.language         || 'uk';
-    });
-
-    // Save
-    document.getElementById('save-btn').onclick = () => {
-      const settings = {
-        apiEndpoint:      document.getElementById('apiEndpoint').value.trim(),
-        passiveIndicator: document.getElementById('passiveIndicator').checked,
-        contextMenu:      document.getElementById('contextMenu').checked,
-        witnessWord:      document.getElementById('witnessWord').checked,
-        autoAnalyze:      document.getElementById('autoAnalyze').checked,
-        language:         document.getElementById('language').value,
-      };
-      chrome.storage.sync.set(settings, () => {
-        const status = document.getElementById('save-status');
-        status.textContent = '✓ ЗБЕРЕЖЕНО';
-        setTimeout(() => status.textContent = '', 2000);
-      });
-    };
-  </script>
+  <script src="options.js"></script>
 </body>
 </html>
