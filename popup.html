@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veritas Witness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 300px;
+      min-height: 180px;
+      background: #080810;
+      color: #c0c0e0;
+      font-family: 'Courier New', monospace;
+      padding: 0;
+    }
+
+    /* scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(100,100,255,0.15);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .eye {
+      font-size: 16px;
+      filter: drop-shadow(0 0 6px rgba(120,120,255,0.6));
+    }
+
+    .title {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #7777cc;
+      font-weight: 700;
+    }
+
+    .version {
+      font-size: 9px;
+      color: #222244;
+      letter-spacing: 1px;
+    }
+
+    .body {
+      padding: 14px 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(100,100,255,0.2);
+      color: #7777bb;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      border-radius: 3px;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(100,100,255,0.08);
+      border-color: rgba(100,100,255,0.4);
+      color: #aaaade;
+    }
+
+    .btn-icon { margin-right: 8px; }
+
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.04);
+      margin: 10px 0;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #333355;
+      letter-spacing: 1px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #333355;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .status-dot.green { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+    .status-dot.red   { background: #f87171; box-shadow: 0 0 6px #f87171; }
+
+    .options-link {
+      font-size: 9px;
+      color: #333355;
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .options-link:hover { color: #7777aa; }
+
+    #entropy-display {
+      font-size: 11px;
+      color: #555577;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <span class="eye">👁</span>
+      <span class="title">VERITAS WITNESS</span>
+    </div>
+    <span class="version">v1.0</span>
+  </div>
+
+  <div class="body">
+    <button class="btn" id="btn-analyze-page">
+      <span class="btn-icon">⟳</span>АНАЛІЗУВАТИ СТОРІНКУ
+    </button>
+    <button class="btn" id="btn-open-sidebar">
+      <span class="btn-icon">◧</span>ВІДКРИТИ ПАНЕЛЬ СВІДКА
+    </button>
+
+    <div class="divider"></div>
+
+    <div class="status-row">
+      <div>
+        <span class="status-dot" id="api-dot"></span>
+        <span id="api-status">перевірка...</span>
+      </div>
+      <span id="entropy-display"></span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="status-row">
+      <span>⚙ <a class="options-link" id="options-link">НАЛАШТУВАННЯ</a></span>
+    </div>
+  </div>
+
+  <script>
+    // Check API status
+    async function checkApi() {
+      const dot  = document.getElementById('api-dot');
+      const text = document.getElementById('api-status');
+      try {
+        const { apiEndpoint } = await chrome.storage.sync.get('apiEndpoint');
+        const ep = (apiEndpoint || 'https://veritas-protocol.onrender.com').replace(/\/$/, '');
+        const res = await fetch(`${ep}/api/health`, { signal: AbortSignal.timeout(5000) });
+        if (res.ok) {
+          dot.classList.add('green');
+          text.textContent = 'API онлайн';
+        } else {
+          throw new Error();
+        }
+      } catch {
+        dot.classList.add('red');
+        text.textContent = 'API недоступний';
+      }
+    }
+
+    // Load current tab badge entropy
+    async function loadEntropy() {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const badge = await chrome.action.getBadgeText({ tabId: tab.id });
+      if (badge) {
+        const el = document.getElementById('entropy-display');
+        el.textContent = `ентропія ${badge}%`;
+      }
+    }
+
+    // Buttons
+    document.getElementById('btn-analyze-page').onclick = async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      await chrome.tabs.sendMessage(tab.id, { type: 'ANALYZE_PAGE' });
+      window.close();
+    };
+
+    document.getElementById('btn-open-sidebar').onclick = async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      await chrome.tabs.sendMessage(tab.id, { type: 'OPEN_SIDEBAR', text: '', source: 'popup' });
+      window.close();
+    };
+
+    document.getElementById('options-link').onclick = () => {
+      chrome.runtime.openOptionsPage();
+      window.close();
+    };
+
+    checkApi();
+    loadEntropy();
+  </script>
+</body>
+</html>
