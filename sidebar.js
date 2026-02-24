@@ -1,22 +1,17 @@
 /**
  * Veritas Witness — Sidebar Logic
  * Handles: sidebar DOM injection, analysis, result rendering, witness word
- * 
- * Sidebar HTML structure is defined in sidebar.html (for reference/documentation).
- * The actual DOM is built here via innerHTML for content script injection.
  */
 
 (function () {
   if (window.__veritasInjected) return;
   window.__veritasInjected = true;
 
-  // ── STATE ──────────────────────────────────────────────────────────────────
   let sidebarEl        = null;
   let currentResult    = null;
   let currentText      = '';
   let settings         = {};
 
-  // ── INIT ───────────────────────────────────────────────────────────────────
   async function init() {
     settings = await getSettings();
     buildSidebar();
@@ -31,7 +26,6 @@
     );
   }
 
-  // ── BUILD SIDEBAR ──────────────────────────────────────────────────────────
   function buildSidebar() {
     if (document.getElementById('veritas-sidebar')) {
       sidebarEl = document.getElementById('veritas-sidebar');
@@ -71,6 +65,7 @@
             <div id="vt-entropy-value">—</div>
             <div id="vt-entropy-bar-wrap"><div id="vt-entropy-bar"></div></div>
             <div id="vt-verdict">—</div>
+            <div id="vt-explanation" style="display:none"></div>
           </div>
           <div id="vt-signals-block" style="display:none">
             <div class="vt-section-label">СИГНАЛИ</div>
@@ -114,7 +109,6 @@
     syncToggles();
   }
 
-  // ── EVENTS ─────────────────────────────────────────────────────────────────
   function bindEvents() {
     get('vt-close').onclick        = hideSidebar;
     get('vt-analyze-page').onclick = analyzeCurrentPage;
@@ -133,19 +127,10 @@
     get('vt-tog-witness').checked = !!settings.witnessWord;
   }
 
-  // ── VISIBILITY ─────────────────────────────────────────────────────────────
   function showSidebar() { sidebarEl.classList.add('vt-open'); }
   function hideSidebar()  { sidebarEl.classList.remove('vt-open'); }
 
-  // ── TEXT EXTRACTION ────────────────────────────────────────────────────────
-
-  /**
-   * Клонує корінь і видаляє з нього все що не є основним текстом:
-   * навігацію, хедер, футер, сайдбари, рекламу, "читайте також", теги, скрипти.
-   * Залишає тільки тіло статті.
-   */
   function extractArticleText() {
-    // 1. Знаходимо найкращий корінь статті
     const ARTICLE_SELECTORS = [
       'article',
       '[itemprop="articleBody"]',
@@ -157,10 +142,9 @@
       '.story-body',
       '.news-text',
       '.article-text',
-      '[role="main"] p',  // fallback — абзаци в main
+      '[role="main"] p',
     ];
 
-    // Шукаємо перший селектор який дає достатньо тексту
     let articleEl = null;
     for (const sel of ARTICLE_SELECTORS) {
       const el = document.querySelector(sel);
@@ -170,27 +154,20 @@
       }
     }
 
-    // 2. Якщо нічого не знайшли — fallback: збираємо всі <p> з body
     if (!articleEl) {
       const paragraphs = Array.from(document.querySelectorAll('p'))
         .filter(p => {
-          // Виключаємо абзаци в навігації, футері, сайдбарі
           const parent = p.closest('nav, header, footer, aside, [class*="sidebar"], [class*="related"], [class*="recommend"], [class*="also"], [class*="widget"], [id*="sidebar"], [id*="footer"], [id*="header"]');
           return !parent && p.innerText.trim().length > 40;
         })
         .map(p => p.innerText.trim());
-
       return paragraphs.slice(0, 50).join('\n');
     }
 
-    // 3. Клонуємо щоб не псувати DOM
     const clone = articleEl.cloneNode(true);
-
-    // 4. Видаляємо шум з клону
     const NOISE_SELECTORS = [
       'nav', 'header', 'footer', 'aside',
       'script', 'style', 'noscript',
-      // Точні селектори — без wildcard щоб не вбити контент статті
       '[class="sidebar"]', '[id="sidebar"]',
       '[class="related"]', '[id="related"]',
       '[class="related-articles"]', '[id="related-articles"]',
@@ -206,29 +183,17 @@
       '[class="pagination"]',
       'figure > figcaption',
     ];
-
     NOISE_SELECTORS.forEach(sel => {
       clone.querySelectorAll(sel).forEach(el => el.remove());
     });
-
     return clone.innerText.trim();
   }
 
-  // ── ANALYSIS ───────────────────────────────────────────────────────────────
   function analyzeCurrentPage() {
     showSidebar();
     setLoading(true);
-
     const raw = extractArticleText();
-
-    // Беремо перші 1500 слів довжиною > 2 символи (не фільтруємо короткі —
-    // у спортивних текстах багато значущих коротких слів: гол, м'яч, ліга)
-    const words = raw
-      .split(/\s+/)
-      .filter(w => w.length > 2)
-      .slice(0, 1500)
-      .join(' ');
-
+    const words = raw.split(/\s+/).filter(w => w.length > 2).slice(0, 1500).join(' ');
     analyzeText(words);
   }
 
@@ -256,7 +221,6 @@
     });
   }
 
-  // ── RENDER ─────────────────────────────────────────────────────────────────
   function renderResult(data) {
     hide('vt-idle'); hide('vt-error'); show('vt-result');
 
@@ -269,6 +233,14 @@
     setStyle('vt-entropy-bar',   'background', color);
     setText('vt-verdict', data.verdict || '—');
     setStyle('vt-verdict', 'color', color);
+
+    // Пояснення простою мовою
+    if (data.explanation) {
+      setText('vt-explanation', data.explanation);
+      show('vt-explanation');
+    } else {
+      hide('vt-explanation');
+    }
 
     // Signals
     const signals = collectSignals(data);
@@ -300,16 +272,13 @@
         perf.verdict !== 'GENUINE_ACCOUNTABILITY' &&
         perf.verdict !== 'NO_PERFORMATIVE') {
       show('vt-perf-block');
-      setText('vt-perf-verdict',
-        perf.verdict + ' · ' + (perf.score || 0).toFixed(2));
+      setText('vt-perf-verdict', perf.verdict + ' · ' + (perf.score || 0).toFixed(2));
     } else {
       hide('vt-perf-block');
     }
 
-    // Witness Word button
     if (settings.witnessWord) show('vt-witness-btn');
     else hide('vt-witness-btn');
-
     hide('vt-witness-block');
   }
 
@@ -326,7 +295,6 @@
     return s;
   }
 
-  // ── WITNESS WORD ───────────────────────────────────────────────────────────
   function callWitnessWord() {
     if (!currentResult) return;
     const btn = get('vt-witness-btn');
@@ -335,7 +303,6 @@
     show('vt-witness-block');
     setText('vt-witness-text', '...');
 
-    // Передаємо text_topic щоб Oracle не накладав геополітику на спорт/культуру
     const textTopic = currentResult.context?.text_topic || null;
 
     chrome.runtime.sendMessage({
@@ -355,7 +322,6 @@
     });
   }
 
-  // ── UI HELPERS ─────────────────────────────────────────────────────────────
   function get(id)               { return document.getElementById(id); }
   function show(id)              { get(id).style.display = 'block'; }
   function hide(id)              { get(id).style.display = 'none'; }
@@ -384,7 +350,6 @@
     return '#f87171';
   }
 
-  // ── MESSAGE LISTENER ───────────────────────────────────────────────────────
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === 'OPEN_SIDEBAR') {
       showSidebar();
@@ -395,6 +360,5 @@
     }
   });
 
-  // ── START ──────────────────────────────────────────────────────────────────
   init();
 })();
