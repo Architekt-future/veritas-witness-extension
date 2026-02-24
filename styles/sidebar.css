@@ -337,3 +337,14 @@
 #vt-options-link:hover {
   color: #7777aa;
 }
+
+/* ── EXPLANATION (plain language) ── */
+#vt-explanation {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 11px;
+  color: #8888aa;
+  line-height: 1.7;
+  letter-spacing: 0.3px;
+}
