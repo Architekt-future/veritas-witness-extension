@@ -199,9 +199,7 @@
     raw = raw.replace(/Skip Підписуйтеся на нас у соцмережах[\s\S]*?End of Підписуйтеся на нас у соцмережах/gi, '');
     raw = raw.replace(/Skip .{5,60} and continue reading .{5,60}[\s\S]*?End of .{5,60}/gi, '');
 
-    console.log('🔍 VERITAS TEXT:', raw.slice(0, 500));
-    
-    const words = raw.split(/\s+/).filter(w => w.length > 2).slice(0, 1500).join(' ');
+    const words = raw.split(/\s+/).filter(w => w.length > 0).slice(0, 1500).join(' ');
     analyzeText(words);
   }
 
