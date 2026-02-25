@@ -334,7 +334,7 @@
     chrome.runtime.sendMessage({
       type:        'WITNESS_WORD',
       diagnostics: currentResult,
-      textPreview: currentText.slice(0, 300),
+      textPreview: (currentText || '').slice(0, 500),
       textTopic,
     }, (resp) => {
       btn.disabled = false;
