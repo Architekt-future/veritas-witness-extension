@@ -80,6 +80,12 @@
             <div class="vt-section-label">🐊 PERFORMATIVE</div>
             <div id="vt-perf-verdict"></div>
           </div>
+          <div id="vt-pivot-block" style="display:none">
+            <div class="vt-section-label">🔄 НАРАТИВНИЙ PIVOT</div>
+            <div id="vt-pivot-verdict"></div>
+            <div id="vt-pivot-explanation"></div>
+            <div id="vt-pivot-evidence"></div>
+          </div>
           <div id="vt-witness-block" style="display:none">
             <div class="vt-section-label">СЛОВО СВІДКА</div>
             <div id="vt-witness-text"></div>
@@ -283,6 +289,20 @@
       hide('vt-perf-block');
     }
 
+    // Narrative Pivot
+    const pivot = data.narrative_pivot;
+    if (pivot?.has_pivot && pivot.verdict !== 'NO_PIVOT') {
+      show('vt-pivot-block');
+      const endTopics = (pivot.end_topics || []).join(', ');
+      setText('vt-pivot-verdict', pivot.verdict + ' · ' + (pivot.score || 0).toFixed(2));
+      setText('vt-pivot-explanation', pivot.explanation || '');
+      if (pivot.evidence && pivot.evidence.length) {
+        setText('vt-pivot-evidence', '«' + pivot.evidence[0].slice(0, 80) + '…»');
+      }
+    } else {
+      hide('vt-pivot-block');
+    }
+
     if (settings.witnessWord) show('vt-witness-btn');
     else hide('vt-witness-btn');
     hide('vt-witness-block');
@@ -340,7 +360,7 @@
     get('vt-idle').style.display    = 'none';
     if (on) {
       ['vt-signals-block','vt-context-block','vt-perf-block',
-       'vt-witness-block','vt-witness-btn'].forEach(hide);
+       'vt-pivot-block','vt-witness-block','vt-witness-btn'].forEach(hide);
     }
   }
 
