@@ -316,7 +316,9 @@
       s.push('⚒ ' + data.lac_labor.verdict);
     if (data.self_preservation?.verdict && data.self_preservation.verdict !== 'SAFE')
       s.push('🛡 ' + data.self_preservation.verdict);
-    if (data.meta_intent?.verdict && data.meta_intent.verdict !== 'TRANSPARENT')
+    if (data.meta_intent?.verdict && 
+        data.meta_intent.verdict !== 'TRANSPARENT' &&
+        data.meta_intent.verdict !== 'CLEAN')
       s.push('🎯 ' + data.meta_intent.verdict);
     return s;
   }
