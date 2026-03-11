@@ -78,6 +78,9 @@
             <div id="vt-entropy-value">—</div>
             <div id="vt-entropy-bar-wrap"><div id="vt-entropy-bar"></div></div>
             <div id="vt-entropy-multiplier" style="display:none"></div>
+          <!-- INTERACTION COMBOS -->
+          <div id="vt-interaction-combos" style="display:none;"></div>
+
 
           <!-- INFLUENCE TIER -->
           <div id="vt-tier-block" style="display:none;">
@@ -314,6 +317,10 @@
       hide('vt-explanation');
     }
 
+    function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  // ── INTERACTION COMBOS ─────────────────────────────────────────────────
+    renderInteractionCombos(data);
+
     // ── INFLUENCE TIER ──────────────────────────────────────────────────────
     renderTier(data);
 
@@ -373,6 +380,39 @@
     hide('vt-witness-block');
   }
 
+
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  // ── INTERACTION COMBOS ───────────────────────────────────────────────────────
+  const MOD_ICON = {
+    manipulation:'🧠', framing:'🖼️', claim_gap:'📭',
+    lac_epistemology:'🔬', axiom:'⚠️', meta_intent:'🎯',
+    self_preservation:'🛡', performative:'🐊',
+    lac_finance:'💰', lac_labor:'⚙️', narrative_pivot:'🔄',
+  };
+
+  function renderInteractionCombos(data) {
+    const wrap  = get('vt-interaction-combos');
+    if (!wrap) return;
+    const combos = data.interaction_combos;
+    const bonus  = data.interaction_bonus || 0;
+    if (!combos || combos.length === 0 || bonus === 0) {
+      hide('vt-interaction-combos'); wrap.innerHTML = ''; return;
+    }
+
+    wrap.innerHTML = combos.map(c => {
+      const label    = c.label_uk || c.label_en || '';
+      const mods     = c.modules.map(m => (MOD_ICON[m]||'') + ' ' + m).join(' + ');
+      const bonusFmt = '+' + Math.round(c.bonus * 100) + '%';
+      return `<div style="display:flex;align-items:center;gap:5px;font-size:9px;margin:2px 0;">
+        <span style="color:#ffaa44">⚡ ${esc(label)}</span>
+        <span style="color:#445;font-size:0.85em">(${esc(mods)})</span>
+        <span style="color:#ff7733;margin-left:auto">${bonusFmt}</span>
+      </div>`;
+    }).join('');
+
+    show('vt-interaction-combos');
+  }
 
   // ── INFLUENCE TIER ─────────────────────────────────────────────────────────
   const TIER_MOD_LABELS = {
@@ -655,7 +695,7 @@
     get('vt-idle').style.display    = 'none';
     if (on) {
       [
-        'vt-tier-block', 'vt-modules-block', 'vt-signals-block', 'vt-context-block',
+        'vt-interaction-combos', 'vt-tier-block', 'vt-modules-block', 'vt-signals-block', 'vt-context-block',
         'vt-perf-block', 'vt-pivot-block', 'vt-witness-block', 'vt-witness-btn',
         'vt-entropy-multiplier',
       ].forEach(hide);
