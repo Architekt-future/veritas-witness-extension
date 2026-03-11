@@ -78,6 +78,14 @@
             <div id="vt-entropy-value">—</div>
             <div id="vt-entropy-bar-wrap"><div id="vt-entropy-bar"></div></div>
             <div id="vt-entropy-multiplier" style="display:none"></div>
+
+          <!-- INFLUENCE TIER -->
+          <div id="vt-tier-block" style="display:none;">
+            <div id="vt-tier-badge"></div>
+            <div id="vt-tier-desc"></div>
+            <div id="vt-tier-trigger"></div>
+          </div>
+
             <div id="vt-verdict">—</div>
             <div id="vt-explanation" style="display:none"></div>
           </div>
@@ -306,6 +314,9 @@
       hide('vt-explanation');
     }
 
+    // ── INFLUENCE TIER ──────────────────────────────────────────────────────
+    renderTier(data);
+
     // ── MODULES BLOCK ──────────────────────────────────────────────────────
     renderModules(data, diag);
 
@@ -360,6 +371,52 @@
     if (settings.witnessWord) show('vt-witness-btn');
     else hide('vt-witness-btn');
     hide('vt-witness-block');
+  }
+
+
+  // ── INFLUENCE TIER ─────────────────────────────────────────────────────────
+  const TIER_MOD_LABELS = {
+    'self_preservation': 'Самозбереження',
+    'manipulation':      'Маніпуляція',
+    'meta_intent':       'Мета-намір',
+    'axiom':             'Аксіом-дрейф',
+    'framing':           'Фреймінг',
+    'lac_epistemology':  'LAC Епіст.',
+    'performative':      'Performative',
+    'narrative_pivot':   'Pivot',
+    'claim_gap':         'Заяви↑',
+    'entropy':           'Ентропія',
+  };
+
+  function renderTier(data) {
+    const block   = get('vt-tier-block');
+    const badge   = get('vt-tier-badge');
+    const desc    = get('vt-tier-desc');
+    const trigger = get('vt-tier-trigger');
+    if (!block) return;
+
+    const it = data.influence_tier;
+    if (!it) { hide('vt-tier-block'); return; }
+
+    const label   = it.label_uk || it.label_en || '';
+    const descTxt = it.desc_uk  || it.desc_en  || '';
+    const color   = it.color || '#888';
+
+    badge.textContent       = label;
+    badge.style.background  = color + '22';
+    badge.style.color       = color;
+    badge.style.border      = `1px solid ${color}55`;
+
+    desc.textContent  = descTxt;
+    desc.style.color  = '#556';
+
+    const modLabel = TIER_MOD_LABELS[it.trigger_module] || it.trigger_module || '';
+    trigger.textContent = modLabel
+      ? `↑ ${modLabel}${it.trigger_value ? ' · ' + it.trigger_value : ''}`
+      : '';
+    trigger.style.color = color;
+
+    show('vt-tier-block');
   }
 
   // ── MODULES BLOCK ──────────────────────────────────────────────────────────
@@ -598,7 +655,7 @@
     get('vt-idle').style.display    = 'none';
     if (on) {
       [
-        'vt-modules-block', 'vt-signals-block', 'vt-context-block',
+        'vt-tier-block', 'vt-modules-block', 'vt-signals-block', 'vt-context-block',
         'vt-perf-block', 'vt-pivot-block', 'vt-witness-block', 'vt-witness-btn',
         'vt-entropy-multiplier',
       ].forEach(hide);
