@@ -517,3 +517,41 @@
 #vt-options-link:hover {
   color: #6666aa;
 }
+
+/* ── INFLUENCE TIER BLOCK ── */
+#vt-tier-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+#vt-tier-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+#vt-tier-desc {
+  font-size: 9px;
+  color: #445;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+
+#vt-tier-trigger {
+  font-size: 8px;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  margin-top: 1px;
+}
