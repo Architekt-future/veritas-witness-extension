@@ -15,12 +15,19 @@
   let currentText   = '';
   let settings      = {};
 
+  let initPromise = null;
+
   async function init() {
     settings = await getSettings();
     buildSidebar();
     if (settings.passiveIndicator && settings.autoAnalyze) {
       analyzeCurrentPage();
     }
+  }
+
+  function ensureInit() {
+    if (!initPromise) initPromise = init();
+    return initPromise;
   }
 
   function getSettings() {
@@ -610,16 +617,17 @@
     return '#f87171';
   }
 
-  // ── MESSAGES ───────────────────────────────────────────────────────────────
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === 'OPEN_SIDEBAR') {
-      showSidebar();
-      if (msg.text) analyzeText(msg.text);
+      ensureInit().then(() => {
+        showSidebar();
+        if (msg.text) analyzeText(msg.text);
+      });
     }
     if (msg.type === 'ANALYZE_PAGE') {
-      analyzeCurrentPage();
+      ensureInit().then(() => analyzeCurrentPage());
     }
   });
 
-  init();
+  ensureInit();
 })();
