@@ -56,6 +56,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'WITNESS_WORD')  { handleWitnessWord(msg, sendResponse); return true; }
   if (msg.type === 'SET_BADGE')     { handleBadge(msg, sender.tab?.id); }
   if (msg.type === 'GET_SETTINGS')  { chrome.storage.sync.get(DEFAULT_SETTINGS, sendResponse); return true; }
+  if (msg.type === 'OPEN_OPTIONS')  { chrome.runtime.openOptionsPage(); }
 });
 
 // ── API: ANALYZE ──────────────────────────────────────────────────────────────
